@@ -18,10 +18,10 @@
 
     // SVG graph element
     graph = document.getElementById('graph'),
-    // Width of the graph
-    width = parseInt(graph.getAttributeNS(null, 'width'), 10),
+    // Width of the graph, always 100, stretched to fit
+    width = parseInt(getComputedStyle(graph).width, 10),
     // Height of the graph
-    height = parseInt(graph.getAttributeNS(null, 'height'), 10),
+    height = parseInt(getComputedStyle(graph).height, 10),
     // Path on the graph
     path = document.getElementById('line'),
     // Path's data attribute
@@ -29,12 +29,12 @@
     // Width of the path's stroke
     strokeWidth = parseInt(getComputedStyle(path).strokeWidth, 10),
 
-    // One pixel of the graph's width
-    pixel,
+    // One userUnit of the graph's width
+    userUnit,
     // Function to return y coordinate
-    getY;
-
-
+    getY,
+    // Function to render the graph
+    render;
 
 
     // y as a function of x
@@ -45,13 +45,17 @@
 	return y;
     };
 
-    // Move to the origin
-    d = 'M0,' + (height/2);
-    // For each pixel
-    for (pixel = 0; pixel <= width; pixel += 1) {
-	t = pixel/width;
-	d += 'L' + pixel + ',' + getY(t);
-    }
-    path.setAttributeNS(null, 'd', d);
+    render = function () {
+	// Move to the origin
+	d = 'M0,' + (height/2);
+	// For each userUnit
+	for (userUnit = 0; userUnit <= width; userUnit += 1) {
+	    t = userUnit/width;
+	    d += 'L' + userUnit + ',' + getY(t);
+	}
+	path.setAttributeNS(null, 'd', d);
+    };
+
+    window.onload = window.onresize = render;
 
 }());
