@@ -1,0 +1,14 @@
+html {
+    font-family:sans-serif, Helvetica;
+    font-size:80%;
+}
+
+svg {
+    background:#f0f0f0;
+}
+
+path {
+    stroke:black;
+    stroke-width:1px;
+    fill:none;
+}
