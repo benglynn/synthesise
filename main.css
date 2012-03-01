@@ -9,12 +9,13 @@ svg {
 
 path {
     stroke:rgba(0, 127, 0, .5);
-    stroke-width:2px;
+    stroke-width:3px;
     fill:none;
 }
 
 path.axis {
-    stroke:#999;
+    stroke:#ccc;
+    stroke-width:1px;
 }
 
 form {
