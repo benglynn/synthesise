@@ -4,14 +4,17 @@ html {
 }
 
 svg {
-    background:#f0f0f0;
     margin-bottom:1em;
 }
 
 path {
-    stroke:black;
-    stroke-width:1px;
+    stroke:rgba(0, 127, 0, .5);
+    stroke-width:2px;
     fill:none;
+}
+
+path.axis {
+    stroke:#999;
 }
 
 form {
@@ -28,6 +31,6 @@ label {
 }
 
 input[type=range] {
-    margin-right:200px;;
+    width:100%;
     
 }

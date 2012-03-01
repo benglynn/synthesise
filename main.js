@@ -7,14 +7,8 @@
 
     var 
 
-    // t: time, the graph always represents 1 second
-    t,
-    // a: amplitude, between 0 and 1
-    a = 1,
-    // w: angular frequency, radians per second
-    w = 2*Math.PI, // 1 revolution or 1Hz
-    // p: phase, where in the cycle when t = 0
-    p = 0,
+    // the duration in seconds represented on the graph
+    graphPeriod = 1/40,
 
     // SVG graph element
     graph = document.getElementById('graph'),
@@ -32,29 +26,51 @@
     // One userUnit of the graph's width
     userUnit,
     // Function to return y coordinate
-    getY,
+    sinusoid, square, sawtooth,
     // Function to render the graph
     render;
 
-    // y as a function of x
-    getY = function(t) {
-	var y = (Math.sin(w*t)*a);
+    /*
+      A sine wave
+      params: time, frequency, amplitude, phase
+     */
+    sinusoid = function(t, f, a, p) {
+	// w: angular frequency, radians per second
+	var w = 2*Math.PI*f,
+	y = (Math.sin(w*t)*a);
 	// translate to graph's height
 	y = (height/2) + (y*(height-strokeWidth)/2);
 	return y;
     };
 
+    /*
+      render the graph
+      params: amplitude, frequency, phase
+     */
     render = function () {
-	// Move to the origin
+	console.log('render');
+	// time
+	var t = 0,
+	// amplitude
+	a = document.getElementById('amplitude').value,
+	// frequency
+	f = document.getElementById('frequency').value,
+	// phase (todo: implement input)
+	p = 0;
+	
+	// Begin the line's data, move to origin
 	d = 'M0,' + (height/2);
 	// For each userUnit
 	for (userUnit = 0; userUnit <= width; userUnit += 1) {
-	    t = userUnit/width;
-	    d += 'L' + userUnit + ',' + getY(t);
+	    t = userUnit/width*graphPeriod;
+	    // move line to that point
+	    d += 'L' + userUnit + ',' + sinusoid(t, f, a, p);
 	}
 	path.setAttributeNS(null, 'd', d);
     };
-
-    window.onload = window.onresize = render;
+    
+    document.getElementById('amplitude').addEventListener('change', render);
+    document.getElementById('frequency').addEventListener('change', render);
+    window.onload = render();
 
 }());
