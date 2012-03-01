@@ -1,0 +1,7 @@
+- read about underscore and bootstrap
+- use bootstrap for MVC, tie in controls
+- audo api
+- square, sawtooth waveforms
+- Display for freq, include note name
+- Bootstrap
+- Slider to add odd (square), or odd and even (sawtooth) harmonics
