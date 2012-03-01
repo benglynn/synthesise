@@ -7,6 +7,15 @@
 
     var 
 
+    // Amplitude
+    a,
+
+    // Frequency
+    f,
+
+    // phase (todo: implement input)
+    p = 0,
+
     // the duration in seconds represented on the graph
     graphPeriod = 1/40,
 
@@ -30,11 +39,12 @@
     // Function to render the graph
     render;
 
+
     /*
       A sine wave
-      params: time, frequency, amplitude, phase
+      params: time
      */
-    sinusoid = function(t, f, a, p) {
+    sinusoid = function(t) {
 	// w: angular frequency, radians per second
 	var w = 2*Math.PI*f,
 	y = (Math.sin(w*t)*a);
@@ -48,15 +58,8 @@
       params: amplitude, frequency, phase
      */
     render = function () {
-	console.log('render');
 	// time
-	var t = 0,
-	// amplitude
-	a = document.getElementById('amplitude').value,
-	// frequency
-	f = document.getElementById('frequency').value,
-	// phase (todo: implement input)
-	p = 0;
+	var t = 0;
 	
 	// Begin the line's data, move to origin
 	d = 'M0,' + (height/2);
@@ -68,9 +71,70 @@
 	}
 	path.setAttributeNS(null, 'd', d);
     };
+
+    // Get values from the form controls
+    var updateAmplitude = function () {
+	a = document.getElementById('amplitude').value;
+    };
     
-    document.getElementById('amplitude').addEventListener('change', render);
-    document.getElementById('frequency').addEventListener('change', render);
-    window.onload = render();
+    var updateFrequency = function () {
+	f = document.getElementById('frequency').value;
+    };
+
+
+    var update = function () {
+	updateAmplitude();
+	updateFrequency();
+	render();
+    };
+
+    // Listen for form changes and set appropriate value
+    document.getElementById('amplitude').addEventListener('change', update);
+    document.getElementById('frequency').addEventListener('change', update);
+
+
+    window.onload = update;
+
+    // Play tone if Audio API available
+
+    var SAMPLE_RATE = 44100;
+    var PI_2 = Math.PI * 2;
+
+    var audioProcessCallback = function (evt)
+    {
+	var buffer = evt.outputBuffer;
+
+	for (var j = 0; j < buffer.numberOfChannels; ++j) {
+	    var channelBuffer = evt.outputBuffer.getChannelData(j);
+
+	    for (var i = 0; i < channelBuffer.length; ++i) {
+		channelBuffer[i] = a * Math.sin(f * PI_2 * (audioProcessCallback.n + i) / SAMPLE_RATE);
+	    }
+	}
+	// Remember the phase for next time to avoid glitches
+	audioProcessCallback.n += i;
+
+	/*if (audioProcessCallback.count++ > 10) {
+	    audioProcessCallback.node.disconnect();
+	}*/
+    };
+
+    if (!window.AudioContext && window.webkitAudioContext) {
+	window.AudioContext = window.webkitAudioContext;
+    }
+    if (window.AudioContext) {
+
+	var ctx = new AudioContext();
+
+	var node = ctx.createJavaScriptNode(256, 0, 1);
+	node.onaudioprocess = audioProcessCallback;
+	node.connect(ctx.destination);
+
+	// todo: ood
+	audioProcessCallback.n = 0;
+	audioProcessCallback.count = 0;
+	audioProcessCallback.node = node;
+    }
+
 
 }());
