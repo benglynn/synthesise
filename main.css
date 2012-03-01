@@ -5,10 +5,29 @@ html {
 
 svg {
     background:#f0f0f0;
+    margin-bottom:1em;
 }
 
 path {
     stroke:black;
     stroke-width:1px;
     fill:none;
+}
+
+form {
+    width:500px;
+}
+
+fieldset {
+    border:none;
+}
+
+label {
+    width:100px;
+    display:inline-block;
+}
+
+input[type=range] {
+    margin-right:200px;;
+    
 }

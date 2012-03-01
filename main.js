@@ -1,4 +1,4 @@
-/*globals document */
+/*globals window, document */
 /*jslint white:true */
 
 (function () {
@@ -18,16 +18,16 @@
 
     // SVG graph element
     graph = document.getElementById('graph'),
-    // Width of the graph, always 100, stretched to fit
-    width = parseInt(getComputedStyle(graph).width, 10),
-    // Height of the graph
-    height = parseInt(getComputedStyle(graph).height, 10),
+    // width and height values from the viewBox attribute
+    viewBox = graph.getAttributeNS(null, 'viewBox').match(/^(\d+)\s*(\d+)\s*(\d+)\s*(\d+)$/),
+    width = parseInt(viewBox[3], 10),
+    height = parseInt(viewBox[4], 10),
     // Path on the graph
     path = document.getElementById('line'),
     // Path's data attribute
     d = path.getAttributeNS(null, 'd'),
     // Width of the path's stroke
-    strokeWidth = parseInt(getComputedStyle(path).strokeWidth, 10),
+    strokeWidth = parseInt(window.getComputedStyle(path).strokeWidth, 10),
 
     // One userUnit of the graph's width
     userUnit,
@@ -35,7 +35,6 @@
     getY,
     // Function to render the graph
     render;
-
 
     // y as a function of x
     getY = function(t) {
