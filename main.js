@@ -1,4 +1,4 @@
-/*jslint white:true, nomen:true */
+/*jslint white:true, nomen:true, vars:true */
 /*globals window, document, jQuery, _, Backbone */
 
 (function ($, Backbone, _) {
@@ -12,18 +12,48 @@
       */
     WaveModel = Backbone.Model.extend({
 	defaults: {
-	    phase: 0
+	    phase: 0,
 	}
     });
 
     GraphView = Backbone.View.extend({
 
 	initialize: function () {
+
+	    // Listen for changes to the model
 	    this.model.bind('change', this.render, this);
+
+	    // todo: override if in options? How can we change this?
+	    this.graphPeriod = 1/40;
+
+	    // width and height values from the viewBox attribute
+	    var viewBox = this.el.getAttributeNS(null, 'viewBox')
+		.match(/^(\d+)\s*(\d+)\s*(\d+)\s*(\d+)$/);
+	    this.width = parseInt(viewBox[3], 10);
+	    this.height = parseInt(viewBox[4], 10);
+	    this.path = this.$('path#line2');
+	    this.strokeWidth = parseInt(this.path.css('stroke-width'), 10);
+
 	},
 
 	render: function () {
-	    console.log('graph render');
+
+	    // Begin at 0 time and the graph's origin, 0 userUnits (SVG units independent of width)
+	    var time = 0, data = 'M0,' + (this.height/2), userUnit = 0;
+	    // For each userUnit
+	    for (userUnit = 0; userUnit <= this.width; userUnit += 1) {
+		time = userUnit/this.width*this.graphPeriod;
+		// w: angular frequency, radians per second
+		var w = 2*Math.PI*this.model.get('frequency');
+		// y: y axis value
+		var y = Math.sin(w*time)*this.model.get('amplitude');
+		// translate to graph's height
+		y = (this.height/2) + (y*(this.height-this.strokeWidth)/2);
+		// move line to that point
+		data += 'L' + userUnit + ',' + y;
+	    }
+	    this.path[0].setAttributeNS(null, 'd', data);
+
 	    return this;
 	}
 
@@ -33,7 +63,7 @@
 
     graph = new GraphView({
 	model: wave,
-	el: document.getElementById('graph2')
+	el: $('#graph2')[0]
     });
 
     wave.set({
