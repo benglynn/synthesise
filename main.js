@@ -1,5 +1,21 @@
-/*globals window, document */
-/*jslint white:true */
+/*jslint white:true, nomen:true */
+/*globals window, document, jQuery, _, Backbone */
+
+(function ($, Backbone, _) {
+
+    "use strict";
+
+    var Graph;
+
+    Graph = Backbone.Model.extend({
+	
+    });
+
+}(jQuery, Backbone, _));
+
+
+
+
 
 (function () {
 
