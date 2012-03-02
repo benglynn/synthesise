@@ -10,6 +10,8 @@
       */
     var WaveModel = Backbone.Model.extend({
 	defaults: {
+	    frequency: 0,
+	    amplitude: 0,
 	    phase: 0,
 	},
 
@@ -29,7 +31,12 @@
 	    return Math.sin(this.getW()*time)*this.get('amplitude');
 	}
     });
+    var wave = new WaveModel();
 
+
+    /**
+     * View representing the SVG graph
+     */
     var GraphView = Backbone.View.extend({
 
 	initialize: function () {
@@ -37,7 +44,7 @@
 	    // Listen for changes to the model
 	    this.model.bind('change', this.render, this);
 
-	    // todo: override if in options? How can we change this?
+	    // todo: override if in options? How can we change this? Read from the SVG?
 	    this.graphPeriod = 1/40;
 
 	    // width and height values from the viewBox attribute
@@ -50,9 +57,13 @@
 
 	},
 
+	/**
+	 * Render the graph
+	 */
 	render: function () {
 
-	    // Begin at 0 time and the graph's origin, 0 userUnits (SVG units independent of width)
+	    // Begin at 0 time and the graph's origin, 0 userUnits (SVG units 
+	    // are independent of width as we're using viewBox)
 	    var time = 0, data = 'M0,' + (this.height/2), userUnit = 0;
 	    // For each userUnit
 	    for (userUnit = 0; userUnit <= this.width; userUnit += 1) {
@@ -70,158 +81,69 @@
 
     });
 
-    
-
-    var wave = new WaveModel();
-
     var graph = new GraphView({
 	model: wave,
 	el: $('#graph2')[0]
     });
 
-    wave.set({
-	frequency: 220,
-	amplitude: 0.5,
+
+    /**
+     * Form controls
+     */
+    var FormView = Backbone.View.extend({
+	
+	events : {
+	    'change #amplitude': 'onAmplitudeChange',
+	    'change #frequency': 'onFrequencyChange'
+	},
+
+	onAmplitudeChange: function (evt) {
+	    wave.set('amplitude', evt.target.value);
+	},
+
+	onFrequencyChange: function (evt) {
+	    wave.set('frequency', evt.target.value);
+	}
+
     });
 
-}(jQuery, Backbone, _));
+    var form = new FormView({
+	el: $('form#graph-controls')[0]
+    });
 
+    form.delegateEvents();
+    $('form#graph-controls input').trigger('change');
 
-
-
-
-(function () {
-
-    "use strict";
-
-    var 
-
-    // Amplitude
-    a,
-
-    // Frequency
-    f,
-
-    // phase (todo: implement input)
-    p = 0,
-
-    // the duration in seconds represented on the graph
-    graphPeriod = 1/40,
-
-    // SVG graph element
-    graph = document.getElementById('graph'),
-
-    // width and height values from the viewBox attribute
-    viewBox = graph.getAttributeNS(null, 'viewBox').match(/^(\d+)\s*(\d+)\s*(\d+)\s*(\d+)$/),
-    width = parseInt(viewBox[3], 10),
-    height = parseInt(viewBox[4], 10),
-
-    // Path on the graph, its data attributs and stroke width
-    path = document.getElementById('line'),
-    d = path.getAttributeNS(null, 'd'),
-    strokeWidth = parseInt(window.getComputedStyle(path).strokeWidth, 10),
-
-    // One userUnit of the graph's width
-    userUnit,
-
-    // Functions to return y coordinate
-    sinusoid, square, sawtooth,
-
-    // update values from UI, render the graph
-    updateAmplitude, updateFrequency, update, render,
-
-    // Audio
-    SAMPLE_RATE = 44100, audioProcessCallback, audioContext, node;
-
-    /**
-      * A sine wave
-      * @params t (number) Time
-      */
-    sinusoid = function(t) {
-	// w: angular frequency, radians per second
-	var w = 2*Math.PI*f,
-	y = (Math.sin(w*t)*a);
-	// translate to graph's height
-	y = (height/2) + (y*(height-strokeWidth)/2);
-	return y;
-    };
-
-    /**
-      * Render the graph
-      */
-    render = function () {
-	// time
-	var t = 0;
-	
-	// Begin the line's data, move to origin
-	d = 'M0,' + (height/2);
-	// For each userUnit
-	for (userUnit = 0; userUnit <= width; userUnit += 1) {
-	    t = userUnit/width*graphPeriod;
-	    // move line to that point
-	    d += 'L' + userUnit + ',' + sinusoid(t, f, a, p);
-	}
-	path.setAttributeNS(null, 'd', d);
-    };
-
-    /**
-      * Get amplitude from the form control
-      */
-    updateAmplitude = function () {
-	a = document.getElementById('amplitude').value;
-    };
-    
-    /**
-      * Get frequency from the form control
-      */
-    updateFrequency = function () {
-	f = document.getElementById('frequency').value;
-    };
-
-
-    /**
-      * Update a and f and render the graph
-      */
-    update = function () {
-	updateAmplitude();
-	updateFrequency();
-	render();
-    };
-
-
-    // Event handlers
-    document.getElementById('amplitude').addEventListener('change', update);
-    document.getElementById('frequency').addEventListener('change', update);
-    window.onload = update;
 
     if (window.webkitAudioContext) {
 
+	var SAMPLE_RATE = 44100; // todo: why is this always 44.1KHz?
 	/**
 	 * Callback for audio process
 	 * @param evt An AudioProcessingEvent
 	 */
-	audioProcessCallback = function (evt)
+	var audioProcessCallback = function (evt)
 	{
 	    var buffer = evt.outputBuffer, j, i, y, channelBuffer;
 	    for (j = 0; j < buffer.numberOfChannels; j += 1) {
 		channelBuffer = evt.outputBuffer.getChannelData(j);
 		for (i = 0; i < channelBuffer.length; i += 1) {
-		    // todo: use sinusoid function
-		    y = a * Math.sin(f * Math.PI*2 * (audioProcessCallback.n + i) / SAMPLE_RATE);
+		    y = wave.getSine((audioProcessCallback.n + i)/SAMPLE_RATE);
 		    channelBuffer[i] = y;
 		}
 	    }
 	    // Remember the phase for next time to avoid glitches
 	    audioProcessCallback.n += i;
 
-	    audioProcessCallback.count += 1;
+	      audioProcessCallback.count += 1;
+	    /*
 	    if (audioProcessCallback.count > 50) {
 		audioProcessCallback.node.disconnect();
-	    }
+	    }*/
 	};
 
-	audioContext = new window.webkitAudioContext();
-	node = audioContext.createJavaScriptNode(1024, 0, 1);
+	var audioContext = new window.webkitAudioContext();
+	var node = audioContext.createJavaScriptNode(1024, 0, 1);
 	node.onaudioprocess = audioProcessCallback;
 	node.connect(audioContext.destination);
 
@@ -231,5 +153,6 @@
 	audioProcessCallback.node = node;
     }
 
+}(jQuery, Backbone, _));
 
-}());
+

@@ -1,7 +1,9 @@
-- read about underscore and bootstrap
-- use bootstrap for MVC, tie in controls
-- audo api
+- AudioNode as model
+- Zero crossing, get rid of that nasty glitch!
+- Break up js, add a MakeFile which also compresses for production
 - square, sawtooth waveforms
 - Display for freq, include note name
-- Bootstrap
 - Slider to add odd (square), or odd and even (sawtooth) harmonics
+- Server side, respect get params
+- Backbone routes for get params?
+- Bootstrap?
