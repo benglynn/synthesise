@@ -5,10 +5,40 @@
 
     "use strict";
 
-    var Graph;
+    var WaveModel, wave, GraphView, graph;
 
-    Graph = Backbone.Model.extend({
-	
+    /**
+      * A wave with an amplitude, frequency and phase
+      */
+    WaveModel = Backbone.Model.extend({
+	defaults: {
+	    phase: 0
+	}
+    });
+
+    GraphView = Backbone.View.extend({
+
+	initialize: function () {
+	    this.model.bind('change', this.render, this);
+	},
+
+	render: function () {
+	    console.log('graph render');
+	    return this;
+	}
+
+    });
+
+    wave = new WaveModel();
+
+    graph = new GraphView({
+	model: wave,
+	el: document.getElementById('graph2')
+    });
+
+    wave.set({
+	frequency: 220,
+	amplitude: 0.5,
     });
 
 }(jQuery, Backbone, _));
