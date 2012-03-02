@@ -5,18 +5,32 @@
 
     "use strict";
 
-    var WaveModel, wave, GraphView, graph;
-
     /**
       * A wave with an amplitude, frequency and phase
       */
-    WaveModel = Backbone.Model.extend({
+    var WaveModel = Backbone.Model.extend({
 	defaults: {
 	    phase: 0,
+	},
+
+	/**
+	  * The angular frequency, radians per second
+	  */
+	getW: function () {
+	    return 2*Math.PI*this.get('frequency');
+	},
+
+	/**
+	 * The value for y at a given time 
+	 */
+	getSine: function (time) {
+	    
+	    // w: angular frequency, radians per second
+	    return Math.sin(this.getW()*time)*this.get('amplitude');
 	}
     });
 
-    GraphView = Backbone.View.extend({
+    var GraphView = Backbone.View.extend({
 
 	initialize: function () {
 
@@ -43,10 +57,7 @@
 	    // For each userUnit
 	    for (userUnit = 0; userUnit <= this.width; userUnit += 1) {
 		time = userUnit/this.width*this.graphPeriod;
-		// w: angular frequency, radians per second
-		var w = 2*Math.PI*this.model.get('frequency');
-		// y: y axis value
-		var y = Math.sin(w*time)*this.model.get('amplitude');
+		var y = this.model.getSine(time);
 		// translate to graph's height
 		y = (this.height/2) + (y*(this.height-this.strokeWidth)/2);
 		// move line to that point
@@ -59,9 +70,11 @@
 
     });
 
-    wave = new WaveModel();
+    
 
-    graph = new GraphView({
+    var wave = new WaveModel();
+
+    var graph = new GraphView({
 	model: wave,
 	el: $('#graph2')[0]
     });
