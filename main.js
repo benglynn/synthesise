@@ -31,8 +31,7 @@
 	    // todo: evaluate on frequency change, persist as a property
 	    var wavelength = 1/this.get('frequency');
 	    // currentPhase is the fraction of the wave cycle elapsed relative to the origin
-	    var currentPhase = time/wavelength % 1;
-	    console.log(currentPhase);
+	    var currentPhase = (time/wavelength) % 1;
 
 	    var y = Math.sin(this.getW()*time)*this.get('amplitude');
 	    return y;
@@ -71,16 +70,25 @@
 	    }
 
 	    // Begin at 0 time and the graph's origin, 0 userUnits
-	    var time = 0, data = 'M0,' + (this.vBHeight/2), userUnit = 0;
-	    // For each userUnit
-	    for (userUnit = 0; userUnit <= this.vBWidth; userUnit += 10) {
+	    var time = 0, data, userUnit = 0, inc = 10;
+	    // For each increment
+	    for (userUnit = 0; userUnit <= this.vBWidth; userUnit += inc) {
 		// time in seconds
 		var time = userUnit/this.vBWidth*this.model.get('graphPeriod');
 		var y = this.model.getSine(time);
 		// translate to graph's height
 		y = (this.vBHeight/2) + (y*(this.vBHeight-this.strokeWidth)/2);
-		// move line to that point
-		data += 'L' + userUnit + ',' + y;
+
+		// Start or add to the line's data
+		if (userUnit === 0) {
+		    data = 'M';
+		} else {
+		    data += 'L';
+		}
+		data += userUnit + ',' + y;
+		if (inc > 1) {
+		    data += 'L' + (userUnit + inc) + ',' + y;
+		}
 	    }
 	    this.$path[0].setAttributeNS(null, 'd', data);
 
