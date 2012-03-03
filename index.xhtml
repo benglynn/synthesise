@@ -12,23 +12,23 @@
       <svg 
 	 xmlns="http://www.w3.org/2000/svg" 
 	 id="graph2" 
-	 width="600"
-	 height="150"
+	 width="1200"
+	 height="300"
 	 viewBox="0 0 600  151"
 	 preserveAspectRatio="xMinYMin meet">
 	<!-- todo: viewbox can be 100 units, maintain aspect ratio -->
 	<!-- todo: populate appropriately -->
 	<path class="axis" d="M0,75.5L600,75.5"/>
-	<path class="marker" d="M300,0L300,150"/>
+	<path class="mid-point" d="M300,0L300,150"/>
 	<path id="line2" d="M0,75.5L600,75.5"/>
 	<!-- todo: axes -->
       </svg>
-      <form action="." method="get" id="graph-controls">
+      <form action="." method="get" id="graph-controls" style="display:none;">
 	<fieldset>
 	  <label for="amplitude">Amplitude</label>
-	  <input name="amplitude" id="amplitude" type="range" min="0" max="1" value="1" step="0.01"/>
+	  <input name="amplitude" id="amplitude" type="range" min="0" max=".75" value="1" step="0.01"/>
 	  <label for="frequency">Frequency</label>
-	  <input name="frequency" id="frequency" type="range" min="20" max="2000" value="50" step="0.1"/>
+	  <input name="frequency" id="frequency" type="range" min="20" max="2000" value="30" step="0.1"/>
 	  <!-- todo: phase, harmonics -->
 	  <!-- todo: implement server side, initially populate graph -->
 	  <!--<input type="submit" value="update"/>-->

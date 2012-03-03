@@ -32,9 +32,12 @@
 	    var wavelength = 1/this.get('frequency');
 
 	    // currentPhase is the fraction of the wave cycle elapsed relative to the origin
-	    var currentPhase = (time/wavelength) % 1;
-
-	    var y = Math.sin(this.getW()*time)*this.get('amplitude');
+	    //var currentPhase = (time/wavelength) % 1;
+	    //console.log(currentPhase);
+	    var offset = wavelength*this.get('phase');
+	    var w = this.getW()
+	    var a = this.get('amplitude');
+	    var y = Math.sin(w*(time+offset))*a;
 	    return y;
 	}
     });
@@ -70,16 +73,15 @@
 		return;
 	    }
 
-	    console.log('render');
-
 	    // Begin at 0 time and the graph's origin, 0 userUnits
-	    var time = 0, data, userUnit = 0, inc = 10;
+	    var time = 0, data, userUnit = 0, inc = 1;
 	    // For each increment
 	    for (userUnit = 0; userUnit <= this.vBWidth; userUnit += inc) {
 
 		// todo: for testing only, change the frequency half way through
 		if (userUnit === 300) {
-		    this.model.attributes.frequency = 30;
+		    this.model.attributes.frequency = 90;
+		    this.model.attributes.phase = .5;
 		}
 
 

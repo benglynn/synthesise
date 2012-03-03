@@ -9,8 +9,12 @@ svg {
 
 path {
     stroke:rgba(0, 127, 0, .5);
-    stroke-width:3px;
+    stroke-width:1px;
     fill:none;
+}
+
+path#line2 {
+    stroke-dasharray:9,5;
 }
 
 path.axis {
@@ -18,8 +22,14 @@ path.axis {
     stroke-width:1px;
 }
 
+path.mid-point {
+    stroke:rgba(127, 0, 0, .5);
+    stroke-width:1px;
+    stroke-dasharray:15,120;
+}
+
 path.marker {
-    stroke:#f00;
+    stroke:#00f;
     stroke-width:1px;
 }
 
