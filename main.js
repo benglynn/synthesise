@@ -30,6 +30,7 @@
 
 	    // todo: evaluate on frequency change, persist as a property
 	    var wavelength = 1/this.get('frequency');
+
 	    // currentPhase is the fraction of the wave cycle elapsed relative to the origin
 	    var currentPhase = (time/wavelength) % 1;
 
@@ -69,12 +70,21 @@
 		return;
 	    }
 
+	    console.log('render');
+
 	    // Begin at 0 time and the graph's origin, 0 userUnits
 	    var time = 0, data, userUnit = 0, inc = 10;
 	    // For each increment
 	    for (userUnit = 0; userUnit <= this.vBWidth; userUnit += inc) {
+
+		// todo: for testing only, change the frequency half way through
+		if (userUnit === 300) {
+		    this.model.attributes.frequency = 30;
+		}
+
+
 		// time in seconds
-		var time = userUnit/this.vBWidth*this.model.get('graphPeriod');
+		time = userUnit/this.vBWidth*this.model.get('graphPeriod');
 		var y = this.model.getSine(time);
 		// translate to graph's height
 		y = (this.vBHeight/2) + (y*(this.vBHeight-this.strokeWidth)/2);
