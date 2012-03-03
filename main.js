@@ -9,11 +9,27 @@
       * A wave with an amplitude, frequency and phase
       */
     var WaveModel = Backbone.Model.extend({
+
 	defaults: {
 	    //frequency: 0, // Hz
 	    //amplitude: 0, // 0 >= amplitude <= 1
 	    phase: 0, // 0 >= phase <= 1
 	    graphPeriod: 1/20 // length of x axis in seconds
+	},
+
+	initialize: function () {
+
+	    // Offset, in seconds, set to bring different frequencies into phase
+	    this._phaseOffset = 0;
+	},
+
+	validate: function (attributes) {
+
+	    // todo: validation
+
+	    // Rember previous frequency
+	    this._prevFreq = this.get('frequency');
+
 	},
 
 	/**
@@ -28,13 +44,32 @@
 	 */
 	getSine: function (time) {
 
+	    // If the frequency has changed
+	    if(this._prevFreq !== undefined) {
+
+		// calculate the previous phase
+		var prevWavelength = 1/this._prevFreq;
+		var prevPhase = (time/prevWavelength) % 1;
+
+		// calculate the current phase
+		var curWavelength = 1/this.get('frequency');
+		var curPhase = (time/curWavelength) % 1;
+		
+		// Update the phase offset to avoid glitches
+		this._phaseOffset = Math.abs(prevPhase - curPhase);
+
+		// Forget the previous frequency
+		delete this._prevFreq;
+	    }
+
 	    // todo: evaluate on frequency change, persist as a property
 	    var wavelength = 1/this.get('frequency');
 
-	    // currentPhase is the fraction of the wave cycle elapsed relative to the origin
-	    //var currentPhase = (time/wavelength) % 1;
+	    // currentPhase is the fraction of the wave cycle elapsed
+	    var currentPhase = (time/wavelength) % 1;
 	    //console.log(currentPhase);
-	    var offset = wavelength*this.get('phase');
+
+	    var offset = wavelength*this._phaseOffset;
 	    var w = this.getW()
 	    var a = this.get('amplitude');
 	    var y = Math.sin(w*(time+offset))*a;
@@ -52,7 +87,7 @@
 	initialize: function () {
 
 	    // Listen for changes to the model
-	    this.model.bind('change', this.render, this);
+	    //this.model.bind('change', this.render, this);
 
 	    // width and height values from the viewBox attribute
 	    var viewBox = this.el.getAttributeNS(null, 'viewBox')
@@ -80,8 +115,7 @@
 
 		// todo: for testing only, change the frequency half way through
 		if (userUnit === 300) {
-		    this.model.attributes.frequency = 90;
-		    this.model.attributes.phase = .5;
+		    this.model.set('frequency', 100);
 		}
 
 
@@ -142,6 +176,8 @@
     form.delegateEvents();
     $('form#graph-controls input').trigger('change');
 
+    // render here for now, as we've decoupled the graph for testing
+    graph.render();
 
     if (false && window.webkitAudioContext) {
 

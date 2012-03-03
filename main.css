@@ -14,7 +14,7 @@ path {
 }
 
 path#line2 {
-    stroke-dasharray:9,5;
+    /*stroke-dasharray:9,5;*/
 }
 
 path.axis {
