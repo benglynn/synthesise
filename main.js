@@ -53,10 +53,10 @@
 
 		// calculate the current phase
 		var curWavelength = 1/this.get('frequency');
-		var curPhase = (time/curWavelength) % 1;
+		var curPhase = (time/curWavelength) ;
 		
 		// Update the phase offset to avoid glitches
-		this._phaseOffset = Math.abs(prevPhase - curPhase);
+		this._phaseOffset = prevPhase - curPhase;
 
 		// Forget the previous frequency
 		delete this._prevFreq;
@@ -115,7 +115,7 @@
 
 		// todo: for testing only, change the frequency half way through
 		if (userUnit === 300) {
-		    this.model.set('frequency', 100);
+		    this.model.set('frequency', 90);
 		}
 
 
