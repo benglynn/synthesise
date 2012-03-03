@@ -18,6 +18,11 @@ path.axis {
     stroke-width:1px;
 }
 
+path.marker {
+    stroke:#f00;
+    stroke-width:1px;
+}
+
 form {
     width:500px;
 }
