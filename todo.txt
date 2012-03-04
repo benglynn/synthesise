@@ -1,30 +1,9 @@
 Glitch issue
 
-1. Fade out and in or crossfade when waveform changes.
-
-- Variable length of fade
-- Equal power/linear algorithm
-- Could deal with f, a or p changes
-- Where do we maintain state?
-
-2. Wait for a zero crossing point
-
-- 0 or 0.5
-- Then may need to set initial phase of new wave to 0.5. Phase reverse or polarity
-- a would be okay, as we're crossing 0
-- p is phase offset, affects both so okay
-- where do we maintain state for initial phase?
+- Oscillator
+- AudioContext - master clock
 
 
-Wave
-
-GraphModel
-
-GraphView
-
-SoundModel
-
-SoundView 
 
 
 - AudioNode as model

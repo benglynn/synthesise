@@ -5,16 +5,18 @@
 
     "use strict";
 
+    // todo, OOD for these globals
+    var graphPeriod = 1/20;
+
     /**
-      * A wave with an amplitude, frequency and phase
+      * Returns amplitude at a given time. Phase is maintained when frequency is
+      * altered. Supports only one time domain, so should not be queried by more
+      * than one AudioContext.
       */
-    var WaveModel = Backbone.Model.extend({
+    var OscillatorModel = Backbone.Model.extend({
 
 	defaults: {
 	    //frequency: 0, // Hz
-	    //amplitude: 0, // 0 >= amplitude <= 1
-	    phase: 0, // 0 >= phase <= 1
-	    graphPeriod: 1/20 // length of x axis in seconds
 	},
 
 	initialize: function () {
@@ -71,12 +73,11 @@
 
 	    var offset = wavelength*this._phaseOffset;
 	    var w = this.getW()
-	    var a = this.get('amplitude');
-	    var y = Math.sin(w*(time+offset))*a;
+	    var y = Math.sin(w*(time+offset));
 	    return y;
 	}
     });
-    var wave = new WaveModel();
+    var wave = new OscillatorModel();
 
 
     /**
@@ -104,7 +105,7 @@
 	 */
 	render: function () {
 
-	    if (this.model.get('amplitude') === undefined || this.model.get('frequency') === undefined) {
+	    if (this.model.get('frequency') === undefined) {
 		return;
 	    }
 
@@ -120,7 +121,7 @@
 
 
 		// time in seconds
-		time = userUnit/this.vBWidth*this.model.get('graphPeriod');
+		time = userUnit/this.vBWidth*graphPeriod;
 		var y = this.model.getSine(time);
 		// translate to graph's height
 		y = (this.vBHeight/2) + (y*(this.vBHeight-this.strokeWidth)/2);
@@ -155,12 +156,7 @@
     var FormView = Backbone.View.extend({
 	
 	events : {
-	    'change #amplitude': 'onAmplitudeChange',
 	    'change #frequency': 'onFrequencyChange'
-	},
-
-	onAmplitudeChange: function (evt) {
-	    wave.set('amplitude', evt.target.value);
 	},
 
 	onFrequencyChange: function (evt) {
