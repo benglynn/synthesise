@@ -9,29 +9,26 @@
     var graphPeriod = 1/20;
 
     /**
-      * Returns amplitude at a given time. Phase is maintained when frequency is
-      * altered. Supports only one time domain, so should not be queried by more
-      * than one AudioContext.
+      * Returns -1 >= y <= 1 at a given time. Phase is maintained when frequency
+      * is altered.
       */
     var OscillatorModel = Backbone.Model.extend({
 
 	defaults: {
-	    //frequency: 0, // Hz
+	    frequency: 1, // Hz
 	},
 
 	initialize: function () {
 
-	    // Offset, in seconds, set to bring different frequencies into phase
+	    // Offset the phase of the waveform after frequency has changed to
+	    // ensure consistant phase and so avoid audible glitches
 	    this._phaseOffset = 0;
 	},
 
 	validate: function (attributes) {
 
-	    // todo: validation
-
-	    // Rember previous frequency
+	    // Remember the previous frequency
 	    this._prevFreq = this.get('frequency');
-
 	},
 
 	/**
@@ -42,36 +39,23 @@
 	},
 
 	/**
-	 * The value for y at a given time (seconds)
+	 * Value of y at a given time (seconds)
 	 */
 	getSine: function (time) {
 
-	    // If the frequency has changed
-	    if(this._prevFreq !== undefined) {
+	    var curWavelength = 1/this.get('frequency');
 
-		// calculate the previous phase
+	    // If the frequency has changed, slide the new waveform to match the
+	    // phase of the old
+	    if(this._prevFreq !== undefined) {
 		var prevWavelength = 1/this._prevFreq;
 		var prevPhase = (time/prevWavelength) % 1;
-
-		// calculate the current phase
-		var curWavelength = 1/this.get('frequency');
 		var curPhase = (time/curWavelength) ;
-		
-		// Update the phase offset to avoid glitches
 		this._phaseOffset = prevPhase - curPhase;
-
-		// Forget the previous frequency
+		// Forget the previous frequency, we don't want to adjust again
 		delete this._prevFreq;
 	    }
-
-	    // todo: evaluate on frequency change, persist as a property
-	    var wavelength = 1/this.get('frequency');
-
-	    // currentPhase is the fraction of the wave cycle elapsed
-	    var currentPhase = (time/wavelength) % 1;
-	    //console.log(currentPhase);
-
-	    var offset = wavelength*this._phaseOffset;
+	    var offset = curWavelength*this._phaseOffset;
 	    var w = this.getW()
 	    var y = Math.sin(w*(time+offset));
 	    return y;
@@ -116,7 +100,7 @@
 
 		// todo: for testing only, change the frequency half way through
 		if (userUnit === 300) {
-		    this.model.set('frequency', 90);
+		    this.model.set('frequency', 570);
 		}
 
 
