@@ -22,11 +22,6 @@ path.axis {
     stroke-width:1px;
 }
 
-path.mid-point {
-    stroke:rgba(127, 0, 0, .5);
-    stroke-width:1px;
-    stroke-dasharray:15,120;
-}
 
 path.marker {
     stroke:#00f;

@@ -57,11 +57,12 @@
 	    }
 	    var offset = curWavelength*this._phaseOffset;
 	    var w = this.getW()
-	    var y = Math.sin(w*(time+offset));
+	    time += offset;
+	    var y = Math.sin(w*time);
 	    return y;
 	}
     });
-    var wave = new OscillatorModel();
+    var oscillator = new OscillatorModel();
 
 
     /**
@@ -81,7 +82,6 @@
 	    this.vBHeight = parseInt(viewBox[4], 10);
 	    this.$path = this.$('path#line2');
 	    this.strokeWidth = parseInt(this.$path.css('stroke-width'), 10);
-
 	},
 
 	/**
@@ -95,14 +95,12 @@
 
 	    // Begin at 0 time and the graph's origin, 0 userUnits
 	    var time = 0, data, userUnit = 0, inc = 1;
-	    // For each increment
 	    for (userUnit = 0; userUnit <= this.vBWidth; userUnit += inc) {
 
-		// todo: for testing only, change the frequency half way through
-		if (userUnit === 300) {
-		    this.model.set('frequency', 570);
-		}
-
+		// // todo: for testing only, change the frequency half way through
+		// if (userUnit === 300) {
+		//     this.model.set('frequency', 570);
+		// }
 
 		// time in seconds
 		time = userUnit/this.vBWidth*graphPeriod;
@@ -118,21 +116,18 @@
 		}
 		data += userUnit + ',' + y;
 		if (inc > 1) {
-		    data += 'L' + (userUnit + inc) + ',' + y;
+		    data += 'L' + (userUnit + inc) + ',' + y; //todo: templates?
 		}
 	    }
 	    this.$path[0].setAttributeNS(null, 'd', data);
-
 	    return this;
 	}
-
     });
 
     var graph = new GraphView({
-	model: wave,
+	model: oscillator,
 	el: $('#graph2')[0]
     });
-
 
     /**
      * Form controls
@@ -144,7 +139,7 @@
 	},
 
 	onFrequencyChange: function (evt) {
-	    wave.set('frequency', evt.target.value);
+	    oscillator.set('frequency', evt.target.value);
 	}
 
     });
@@ -159,9 +154,13 @@
     // render here for now, as we've decoupled the graph for testing
     graph.render();
 
-    if (false && window.webkitAudioContext) {
+    if (window.webkitAudioContext) {
 
-	var SAMPLE_RATE = 44100; // todo: why is this always 44.1KHz?
+
+	var audioContext = new window.webkitAudioContext();
+	var sampleRate = audioContext.sampleRate;
+	var bufferSize = 1024;
+
 	/**
 	 * Callback for audio process
 	 * @param evt An AudioProcessingEvent
@@ -172,12 +171,12 @@
 	    for (j = 0; j < buffer.numberOfChannels; j += 1) {
 		channelBuffer = evt.outputBuffer.getChannelData(j);
 		for (i = 0; i < channelBuffer.length; i += 1) {
-		    y = wave.getSine((audioProcessCallback.n + i)/SAMPLE_RATE);
+		    var time = (i + audioProcessCallback.lastTime)/sampleRate;
+		    y = oscillator.getSine((time));
 		    channelBuffer[i] = y;
 		}
 	    }
-	    // Remember the phase for next time to avoid glitches
-	    audioProcessCallback.n += i;
+	    audioProcessCallback.lastTime += i;
 
 	      audioProcessCallback.count += 1;
 	    /*
@@ -185,14 +184,11 @@
 		audioProcessCallback.node.disconnect();
 	    }*/
 	};
-
-	var audioContext = new window.webkitAudioContext();
-	var node = audioContext.createJavaScriptNode(1024, 0, 1);
+	var node = audioContext.createJavaScriptNode(bufferSize, 0, 1);
 	node.onaudioprocess = audioProcessCallback;
 	node.connect(audioContext.destination);
-
 	// todo: OOD
-	audioProcessCallback.n = 0;
+	audioProcessCallback.lastTime = 0;
 	audioProcessCallback.count = 0;
 	audioProcessCallback.node = node;
     }
